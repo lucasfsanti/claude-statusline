@@ -16,7 +16,7 @@ sources | feat-x | ✓ | +12 -3
 
 **Linha 2**
 - Diretório atual (usa `cwd` se `workspace.current_dir` não existir).
-- Branch e marcador `✓` (limpo) / `✗` (alterações), apenas quando há git worktree.
+- Branch e marcador `✓` (limpo) / `✗` (alterações), sempre que o diretório está em um repositório git (em HEAD destacado mostra o SHA curto).
 - Linhas adicionadas (`+`) e removidas (`-`).
 
 Campos ausentes são omitidos, sem separadores `|` sobrando.

@@ -150,9 +150,13 @@ __git_branch() {
   cwd="$(__field workspace.current_dir)"
   if [ -z "$cwd" ]; then cwd="$(__field cwd)"; fi
   if [ -n "$cwd" ] && command -v git >/dev/null 2>&1; then
-    git -C "$cwd" rev-parse --abbrev-ref HEAD 2>/dev/null
-  else
-    __field workspace.git_worktree
+    local b
+    b="$(git --no-optional-locks -C "$cwd" symbolic-ref --short -q HEAD 2>/dev/null)"
+    if [ -z "$b" ]; then
+      # Detached HEAD (or not a repo): fall back to short SHA, empty if no repo.
+      b="$(git --no-optional-locks -C "$cwd" rev-parse --short HEAD 2>/dev/null)"
+    fi
+    printf '%s' "$b"
   fi
 }
 __git_dirty() {
@@ -160,7 +164,7 @@ __git_dirty() {
   cwd="$(__field workspace.current_dir)"
   if [ -z "$cwd" ]; then cwd="$(__field cwd)"; fi
   if [ -n "$cwd" ] && command -v git >/dev/null 2>&1; then
-    if [ -n "$(git -C "$cwd" status --porcelain 2>/dev/null)" ]; then printf '1'; else printf '0'; fi
+    if [ -n "$(git --no-optional-locks -C "$cwd" status --porcelain 2>/dev/null)" ]; then printf '1'; else printf '0'; fi
   else
     printf '0'
   fi
@@ -302,11 +306,9 @@ __v="$(__basename "$__v")"
 if [ -n "$__v" ]; then
   __sep; __emit '38;2;137;180;250' "$__v"
 fi
-if [ -n "$__wt" ]; then
-  __out="$(__git_branch)"
-  if [ -n "$__out" ]; then
-    __sep; __emit '38;2;166;227;161' "$__out"
-  fi
+__out="$(__git_branch)"
+if [ -n "$__out" ]; then
+  __sep; __emit '38;2;166;227;161' "$__out"
   __sep
   if [ "$(__git_dirty)" = '1' ]; then
     __emit '38;2;249;226;175' '✗'
